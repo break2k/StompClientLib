@@ -321,6 +321,22 @@ public class StompClientLib: NSObject, SRWebSocketDelegate {
                     })
                 }
             }
+        } else if let data = command.data(using: String.Encoding.utf8),
+            let delegate = delegate,
+            let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? AnyObject {
+
+            DispatchQueue.main.async(execute: {
+                delegate.stompClient(client: self,
+                                     didReceiveMessageWithJSONBody: json,
+                                     withHeader: headers,
+                                     withDestination: self.destinationFromHeader(header: headers))
+
+                // Send as a String JSON Body
+                delegate.stompClientJSONBody(client: self,
+                                             didReceiveMessageWithJSONBody: command,
+                                             withHeader: headers,
+                                             withDestination: self.destinationFromHeader(header: headers))
+            })
         }
     }
     
